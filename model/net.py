@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from torch_scatter import scatter_add
 from model.dynamic_reduction_network import DynamicReductionNetwork
 from model.graph_met_network import GraphMETNetwork
+from hgq.layers import QUnaryFunctionLUT
 
 '''
 
@@ -23,11 +24,13 @@ class Net(nn.Module):
         self.graphnet = GraphMETNetwork(continuous_dim, categorical_dim, norm,
                                         output_dim=1, hidden_dim=32,
                                         conv_depth=2)
+        #self.sigmoid = QUnaryFunctionLUT('sigmoid')
     
     def forward(self, x_cont, x_cat, edge_index, batch):
         weights = self.graphnet(x_cont, x_cat, edge_index, batch)
-        return torch.sigmoid(weights)
-        #return F.relu(weights)
+        #return self.sigmoid(weights)
+        #return torch.sigmoid(weights)
+        return F.relu(weights)
 
 # tensor operations
 def getdot(vx, vy):

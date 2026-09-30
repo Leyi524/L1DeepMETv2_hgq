@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --job-name=l1deepmetv2_128_relu
+#SBATCH --partition=work
+#SBATCH --qos=light
+#SBATCH --gres=mps:25
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=2-00:00:00
+#SBATCH --output=slurm/logs/%x_%j.out
+#SBATCH --error=slurm/logs/%x_%j.err
+
+eval "$(mamba shell hook --shell bash)"
+mamba activate deepmet
+cd ~/L1DeepMETv2
+git checkout dev_hgq
+python train.py --data data_ttbar --ckpts ckpts_ttbar_128reluRecoil --batch_size 128
