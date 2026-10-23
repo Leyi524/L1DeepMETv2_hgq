@@ -25,6 +25,7 @@ from time import strftime, gmtime
 ### UPDATED LOSSES
 import keras
 from model.losses import L1METMLRecoilLoss
+from torch_geometric.utils import scatter
 
 '''
 
@@ -84,7 +85,16 @@ def train(model, device, optimizer, scheduler, loss_fn, dataloader):
             edge_index = radius_graph(etaphi, r=deltaR, batch=data.batch, loop=False, max_num_neighbors=255)  # turn off self-loop
             result = model(x_cont, x_cat, edge_index, data.batch, training = True)
             
-            loss = loss_fn(result, data.x, data.y, data.batch, scale_momentum)
+            ### UPDATED LOSSES
+            px = data.x[:, 1]
+            py = data.x[:, 2]
+            uTx = scatter_add(result * px, data.batch)
+            uTy = scatter_add(result * py, data.batch)
+            y_pred = torch.stack((uTx, uTy), dim=1)
+            y_true = torch.stack((-data.y[:, 0] / scale_momentum, -data.y[:, 1] / scale_momentum), dim=1)
+
+            #loss = loss_fn(result, data.x, data.y, data.batch, scale_momentum)
+            loss = loss_fn(y_true, y_pred) ### UPDATED LOSSES
             loss += sum(model.losses) # keras, pytorch lack communication for hgq-weights and overall gnn struct
             loss.backward()
             optimizer.step()
@@ -147,7 +157,7 @@ if __name__ == '__main__':
     # loss function
     #loss_fn = net.loss_fn   # without response correction
     #loss_fn = net.loss_fn_response_tune
-    loss_fn = L1METMLRecoilLoss()    ### UPDATED LOSSES
+    loss_fn = L1METMLRecoilLoss(normFac=scale_momentum)    ### UPDATED LOSSES
     
     metrics = net.metrics
     
