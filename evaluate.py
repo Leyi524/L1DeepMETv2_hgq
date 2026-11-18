@@ -290,8 +290,12 @@ if __name__ == '__main__':
 
     # Define the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = net.Net(n_features_cont, n_features_cat).to(device) #include puppi
+    #model = net.Net(n_features_cont, n_features_cat).to(device) #include puppi
     #model = net.Net(n_features_cont-1, n_features_cat).to(device) #remove puppi
+    
+    ### UPDATED LOSSES
+    norm = torch.tensor([1./scale_momentum, 1./scale_momentum, 1./scale_momentum, 1., 1., 1.]).to(device)
+    model = hgq_net.GraphMETNetwork(n_features_cont, n_features_cat, norm, hidden_dim=32, conv_depth=2).to(device)
     
     #scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, threshold=0.05)
     optimizer = torch.optim.AdamW(model.parameters(),lr=float(args.lr), weight_decay=float(args.weight_decay))
