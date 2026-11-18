@@ -20,6 +20,11 @@ from torch_cluster import radius_graph, knn_graph
 
 import matplotlib.pyplot as plt
 
+### UPDATED LOSSES
+import keras
+from model.losses import L1METMLRecoilLoss
+from torch_scatter import scatter_add
+
 '''
 
 Change from DeepMETv2
@@ -146,7 +151,16 @@ def evaluate(model, device, loss_fn, dataloader, metrics, deltaR, deltaR_dz, mod
         #toc = time.time()
         #print('Event processing speed', toc - tic)
 
-        loss = loss_fn(result, data.x, data.y, data.batch)
+        #loss = loss_fn(result, data.x, data.y, data.batch)
+        ### UPDATED LOSSES
+        px = data.x[:, 1]
+        py = data.x[:, 2]
+        uTx = scatter_add(result * px, data.batch)
+        uTy = scatter_add(result * py, data.batch)
+        y_pred = torch.stack((uTx, uTy), dim=1)
+        y_true = torch.stack((-data.y[:, 0] / scale_momentum, -data.y[:, 1] / scale_momentum), dim=1)
+
+        loss = loss_fn(y_true, y_pred) ### UPDATE loss_fn
 
         # compute all metrics on this batch
         resolutions, METs, weights_pdgId, puppi_weights_pdgId = metrics['resolution'](result, data.x, data.y, data.batch, scale_momentum)
