@@ -44,6 +44,7 @@ class GraphMETNetwork(nn.Module):
         self.output_dense1 = QDense(hidden_dim//2)
         self.output_elu = QUnaryFunctionLUT(activation='elu')
         self.output_dense2 = QDense(output_dim)
+        self.output_act = QUnaryFunctionLUT(activation='relu') ### ACTIVATION
 
         self.pdgs = [1, 2, 11, 13, 22, 130, 211]
 
@@ -51,7 +52,7 @@ class GraphMETNetwork(nn.Module):
         # Normalize the input values within [0,1] range: pt, px, py, eta, phi, puppiWeight, pdgId, charge
         #norm = torch.tensor([1./2950., 1./2950, 1./2950, 1., 1., 1.]).to(device) 
 
-        x_cont *= self.datanorm
+        x_cont = x_cont * self.datanorm
 
         emb_cont = self.embed_continuous_dense(x_cont, training=training)
         emb_cont = self.embed_continuous_elu(emb_cont, training=training)
@@ -86,6 +87,7 @@ class GraphMETNetwork(nn.Module):
         out = self.output_dense1(emb, training = training)
         out = self.output_elu(out, training = training)
         out = self.output_dense2(out, training = training)
+        out = self.output_act(out, training=training)  ### ACTIVATION
         
         return out.squeeze(-1)
     @property
