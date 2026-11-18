@@ -160,7 +160,7 @@ if __name__ == '__main__':
     # loss function
     #loss_fn = net.loss_fn   # without response correction
     #loss_fn = net.loss_fn_response_tune
-    loss_fn = L1METMLRecoilLoss(normFac=scale_momentum, respcorr_factor = arg.respcorr)    ### UPDATED LOSSES
+    loss_fn = L1METMLRecoilLoss(normFac=scale_momentum, respcorr_factor = args.respcorr)    ### UPDATED LOSSES
     
     metrics = net.metrics
     
