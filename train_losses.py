@@ -93,7 +93,7 @@ def train(model, device, optimizer, scheduler, loss_fn, dataloader):
             py = data.x[:, 2]
             uTx = scatter_add(result * px, data.batch)
             uTy = scatter_add(result * py, data.batch)
-            y_pred = torch.stack((uTx, uTy), dim=1)
+            y_pred = torch.stack((uTx / scale_momentum, uTy / scale_momentum), dim=1)
             y_true = torch.stack((-data.y[:, 0] / scale_momentum, -data.y[:, 1] / scale_momentum), dim=1)
 
             #loss = loss_fn(result, data.x, data.y, data.batch, scale_momentum)
