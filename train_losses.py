@@ -25,7 +25,7 @@ from time import strftime, gmtime
 ### UPDATED LOSSES
 import keras
 from model.losses import L1METMLRecoilLoss
-from torch_geometric.utils import scatter
+from torch_scatter import scatter_add
 
 '''
 
@@ -54,6 +54,9 @@ parser.add_argument('--lr', default=0.01,
                     help="Learning rate")
 parser.add_argument('--weight_decay', default=0.001,
                     help="Weight decay")
+### UPDATED for test
+parser.add_argument('--respcorr', default=1000,
+                    help="Chosen Response Correction Coefficient")
 
 n_features_cont = 6
 n_features_cat = 2
@@ -157,7 +160,7 @@ if __name__ == '__main__':
     # loss function
     #loss_fn = net.loss_fn   # without response correction
     #loss_fn = net.loss_fn_response_tune
-    loss_fn = L1METMLRecoilLoss(normFac=scale_momentum)    ### UPDATED LOSSES
+    loss_fn = L1METMLRecoilLoss(normFac=scale_momentum, respcorr_factor = arg.respcorr)    ### UPDATED LOSSES
     
     metrics = net.metrics
     
