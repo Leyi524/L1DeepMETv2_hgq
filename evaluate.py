@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 
 ### UPDATED LOSSES
 import keras
+import model.graph_met_network_HGQ as hgq_net
 from model.losses import L1METMLRecoilLoss
 from torch_scatter import scatter_add
 
@@ -49,6 +50,9 @@ parser.add_argument('--lr', default=0.01,
                     help="Learning rate")
 parser.add_argument('--weight_decay', default=0.001,
                     help="Weight decay")
+### UPDATED LOSSES
+parser.add_argument('--respcorr', default=1000,
+                    help="Chosen Response Coefficient")
 
 n_features_cont = 6
 n_features_cat = 2
@@ -294,7 +298,8 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr = 1e-4, max_lr = 1e-3)
     #scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, threshold=0.05)
 
-    loss_fn = net.loss_fn
+    #loss_fn = net.loss_fn
+    loss_fn = L1METMLRecoilLoss(normFac = scale_momentum, respcorr_factor = args.respcorr) ### UPDATED LOSSES
     metrics = net.metrics
     model_dir = osp.join(os.environ['PWD'],args.ckpts)
     deltaR = 0.4
