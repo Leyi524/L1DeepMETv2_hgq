@@ -318,7 +318,9 @@ if __name__ == '__main__':
         best_validation_loss = json.load(restore_metrics)['loss']
 
     # Evaluate
-    test_metrics = evaluate(model, device, loss_fn, test_dl, metrics, deltaR, deltaR_dz, model_dir)
+    #test_metrics = evaluate(model, device, loss_fn, test_dl, metrics, deltaR, deltaR_dz, model_dir)
+    test_metrics, resolutions, MET_arr = evaluate(model, device, loss_fn, test_dl, metrics, deltaR, deltaR_dz, model_dir, epoch, save_METarr=False)
+   
                             
     validation_loss = test_metrics['loss']
     is_best = (validation_loss<best_validation_loss)
